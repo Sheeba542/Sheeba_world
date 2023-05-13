@@ -1,42 +1,11 @@
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/keys");
-const userModel = require("../models/users");
+const express = require("express");
+const router = express.Router();
+const authController = require("../controller/auth");
+const { loginCheck, isAuth, isAdmin } = require("../middleware/auth");
 
-exports.loginCheck = (req, res, next) => {
-  try {
-    let token = req.headers.token;
-    token = token.replace("Bearer ", "");
-    decode = jwt.verify(token, JWT_SECRET);
-    req.userDetails = decode;
-    next();
-  } catch (err) {
-    res.json({
-      error: "You must be logged in",
-    });
-  }
-};
+router.post("/isadmin", authController.isAdmin);
+router.post("/signup", authController.postSignup);
+router.post("/signin", authController.postSignin);
+router.post("/user", loginCheck, isAuth, isAdmin, authController.allUser);
 
-exports.isAuth = (req, res, next) => {
-  let { loggedInUserId } = req.body;
-  if (
-    !loggedInUserId ||
-    !req.userDetails._id ||
-    loggedInUserId != req.userDetails._id
-  ) {
-    res.status(403).json({ error: "You are not authenticate" });
-  }
-  next();
-};
-
-exports.isAdmin = async (req, res, next) => {
-  try {
-    let reqUser = await userModel.findById(req.body.loggedInUserId);
-    // If user role 0 that's mean not admin it's customer
-    if (reqUser.userRole === 0) {
-      res.status(403).json({ error: "Access denied" });
-    }
-    next();
-  } catch {
-    res.status(404);
-  }
-};
+module.exports = router;

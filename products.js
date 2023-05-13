@@ -1,58 +1,31 @@
-const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Schema.Types;
+const express = require("express");
+const router = express.Router();
+const productController = require("../controller/products");
+const multer = require("multer");
 
-const productSchema = new mongoose.Schema(
-  {
-    pName: {
-      type: String,
-      required: true,
-    },
-    pDescription: {
-      type: String,
-      required: true,
-    },
-    pPrice: {
-      type: Number,
-      required: true,
-    },
-    pSold: {
-      type: Number,
-      default: 0,
-    },
-    pQuantity: {
-      type: Number,
-      default: 0,
-    },
-    pCategory: {
-      type: ObjectId,
-      ref: "categories",
-    },
-    pImages: {
-      type: Array,
-      required: true,
-    },
-    pOffer: {
-      type: String,
-      default: null,
-    },
-    pRatingsReviews: [
-      {
-        review: String,
-        user: { type: ObjectId, ref: "users" },
-        rating: String,
-        createdAt: {
-          type: Date,
-          default: Date.now(),
-        },
-      },
-    ],
-    pStatus: {
-      type: String,
-      required: true,
-    },
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/products");
   },
-  { timestamps: true }
-);
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "_" + file.originalname);
+  },
+});
 
-const productModel = mongoose.model("products", productSchema);
-module.exports = productModel;
+const upload = multer({ storage: storage });
+
+router.get("/all-product", productController.getAllProduct);
+router.post("/product-by-category", productController.getProductByCategory);
+router.post("/product-by-price", productController.getProductByPrice);
+router.post("/wish-product", productController.getWishProduct);
+router.post("/cart-product", productController.getCartProduct);
+
+router.post("/add-product", upload.any(), productController.postAddProduct);
+router.post("/edit-product", upload.any(), productController.postEditProduct);
+router.post("/delete-product", productController.getDeleteProduct);
+router.post("/single-product", productController.getSingleProduct);
+
+router.post("/add-review", productController.postAddReview);
+router.post("/delete-review", productController.deleteReview);
+
+module.exports = router;

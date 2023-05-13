@@ -1,49 +1,8 @@
-var braintree = require("braintree");
-require("dotenv").config();
+const express = require("express");
+const router = express.Router();
+const brainTreeController = require("../controller/braintree");
 
-var gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
+router.post("/braintree/get-token", brainTreeController.ganerateToken);
+router.post("/braintree/payment", brainTreeController.paymentProcess);
 
-class brainTree {
-  ganerateToken(req, res) {
-    gateway.clientToken.generate({}, (err, response) => {
-      if (err) {
-        return res.json(err);
-      }
-      return res.json(response);
-    });
-  }
-
-  paymentProcess(req, res) {
-    let { amountTotal, paymentMethod } = req.body;
-    gateway.transaction.sale(
-      {
-        amount: amountTotal,
-        paymentMethodNonce: paymentMethod,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.json(err);
-        }
-
-        if (result.success) {
-          console.log("Transaction ID: " + result.transaction.id);
-          return res.json(result);
-        } else {
-          console.error(result.message);
-        }
-      }
-    );
-  }
-}
-
-const brainTreeController = new brainTree();
-module.exports = brainTreeController;
+module.exports = router;
