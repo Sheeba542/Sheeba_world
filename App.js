@@ -1,15 +1,17 @@
-import React, { Fragment, useReducer } from "react";
-import Routes from "./components";
-import { LayoutContext, layoutState, layoutReducer } from "./components/shop";
+import Header from './components/Header/Header';
+import Routes from './Routes';
+import GlobalStyles from './styles/globalStyles'
+import {
+  BrowserRouter as Router,
+} from "react-router-dom";
 
 function App() {
-  const [data, dispatch] = useReducer(layoutReducer, layoutState);
   return (
-    <Fragment>
-      <LayoutContext.Provider value={{ data, dispatch }}>
-        <Routes />
-      </LayoutContext.Provider>
-    </Fragment>
+    <Router>
+      <Header />
+      <GlobalStyles />
+      <Routes />
+    </Router>
   );
 }
 
