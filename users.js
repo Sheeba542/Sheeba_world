@@ -1,14 +1,22 @@
-const express = require("express");
-const router = express.Router();
-const usersController = require("../controller/users");
+import bcrypt from 'bcryptjs'
 
-router.get("/all-user", usersController.getAllUser);
-router.post("/signle-user", usersController.getSingleUser);
+const users = [
+  {
+    name: 'Admin User',
+    email: 'admin@example.com',
+    password: bcrypt.hashSync('123456', 10),
+    isAdmin: true,
+  },
+  {
+    name: 'John Doe',
+    email: 'john@example.com',
+    password: bcrypt.hashSync('123456', 10),
+  },
+  {
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: bcrypt.hashSync('123456', 10),
+  },
+]
 
-router.post("/add-user", usersController.postAddUser);
-router.post("/edit-user", usersController.postEditUser);
-router.post("/delete-user", usersController.getDeleteUser);
-
-router.post("/change-password", usersController.changePassword);
-
-module.exports = router;
+export default users
