@@ -1,79 +1,77 @@
-const textarea = document.getElementById("textarea1");
+/* 
 
-function f1(e) {
-    let value = e.value;
-    textarea.style.fontSize = value + "px";
-}
+================== Most Important ==================
+* Issue 1 :
+In uploads folder you need create 3 folder like bellow.
+Folder structure will be like: 
+public -> uploads -> 1. products 2. customize 3. categories
+*** Now This folder will automatically create when we run the server file
 
-function f2(e) {
-    if (textarea.style.fontWeight == "bold") {
-        textarea.style.fontWeight = "normal";
-        e.classList.remove("active");
-    }
-    else {
-        textarea.style.fontWeight = "bold";
-        e.classList.add("active");
-    }
-}
+* Issue 2:
+For admin signup just go to the auth 
+controller then newUser obj, you will 
+find a role field. role:1 for admin signup & 
+role: 0 or by default it for customer signup.
+go user model and see the role field.
 
-function f3(e) {
-    if (textarea.style.fontStyle == "italic") {
-        textarea.style.fontStyle = "normal";
-        e.classList.remove("active");
-    }
-    else {
-        textarea.style.fontStyle = "italic";
-        e.classList.add("active");
-    }
-}
+*/
 
-function f4(e) {
-    if (textarea.style.textDecoration == "underline") {
-        textarea.style.textDecoration = "none";
-        e.classList.remove("active");
-    }
-    else {
-        textarea.style.textDecoration = "underline";
-        e.classList.add("active");
-    }
-}
+const express = require("express");
+const app = express();
+require("dotenv").config();
+const mongoose = require("mongoose");
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
-function f5(e) {
-    textarea.style.textAlign = "left";
-}
+// Import Router
+const authRouter = require("./routes/auth");
+const categoryRouter = require("./routes/categories");
+const productRouter = require("./routes/products");
+const brainTreeRouter = require("./routes/braintree");
+const orderRouter = require("./routes/orders");
+const usersRouter = require("./routes/users");
+const customizeRouter = require("./routes/customize");
+// Import Auth middleware for check user login or not~
+const { loginCheck } = require("./middleware/auth");
+const CreateAllFolder = require("./config/uploadFolderCreateScript");
 
-function f6(e) {
-    textarea.style.textAlign = "center";
-}
+/* Create All Uploads Folder if not exists | For Uploading Images */
+CreateAllFolder();
 
-function f7(e) {
-    textarea.style.textAlign = "right";
-}
+// Database Connection
+mongoose
+  .connect(process.env.DATABASE, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
+  .then(() =>
+    console.log(
+      "==============Mongodb Database Connected Successfully=============="
+    )
+  )
+  .catch((err) => console.log("Database Not Connected !!!"));
 
-function f8(e) {
-    if (textarea.style.textTransform == "uppercase") {
-        textarea.style.textTransform = "none";
-        e.classList.remove("active");
-    }
-    else {
-        textarea.style.textTransform = "uppercase";
-        e.classList.add("active");
-    }
-}
+// Middleware
+app.use(morgan("dev"));
+app.use(cookieParser());
+app.use(cors());
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-function f9(e) {
-    textarea.style.fontWeight = "normal";
-    textarea.style.textAlign = "left";
-    textarea.style.fontStyle = "normal";
-    textarea.style.textTransform = "capitalize";
-    textarea.value = "";
-}
-
-function f10(e) {
-    let value = e.value;
-    textarea.style.color = value;
-}
+// Routes
+app.use("/api", authRouter);
+app.use("/api/user", usersRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/product", productRouter);
+app.use("/api", brainTreeRouter);
+app.use("/api/order", orderRouter);
+app.use("/api/customize", customizeRouter);
 
-window.addEventListener('load', () => {
-    textarea.value = "";
+// Run Server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log("Server is running on ", PORT);
 });
